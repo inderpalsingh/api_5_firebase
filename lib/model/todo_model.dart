@@ -7,7 +7,7 @@ class TodoModel {
   bool? isCompleted;
   String? createdAt;
   String? completedAt;
-  Priority? priority;
+  // Priority? priority;
 
   TodoModel({
     this.userId = "",
@@ -16,7 +16,7 @@ class TodoModel {
     this.isCompleted = false,
     required this.createdAt,
     required this.completedAt,
-    this.priority = Priority.LOW,
+    // this.priority = Priority.LOW,
   });
 
   factory TodoModel.fromJSONDoc(Map<String, dynamic> jsonDoc) {
@@ -26,8 +26,9 @@ class TodoModel {
         desc: jsonDoc['desc'],
         isCompleted: jsonDoc['isCompleted'],
         createdAt: jsonDoc['createdAt'],
-        completedAt: jsonDoc['completedAt'],
-        priority: jsonDoc['priority']);
+        completedAt: jsonDoc['completedAt']
+        // priority: jsonDoc['priority']
+    );
   }
 
   Map<String, dynamic> toMapDoc() {
@@ -38,7 +39,7 @@ class TodoModel {
       'isCompleted': isCompleted,
       'createdAt': createdAt,
       'completedAt': completedAt,
-      'priority': priority,
+      // 'priority': priority,
     };
   }
 }

@@ -22,6 +22,7 @@ class _TodoPageState extends State<TodoPage> {
   
   
   String? userId;
+  bool? isComplete;
 
   DateFormat dateFormat = DateFormat("yyyy-MM-dd HH:mm:ss");
   
@@ -48,7 +49,6 @@ class _TodoPageState extends State<TodoPage> {
   Widget build(BuildContext context) {
     allData = fireStore.collection('users').doc(userId).collection('notes');
     
-    
     return Scaffold(
       backgroundColor: Colors.blueGrey.shade200,
       body: userId != null ?
@@ -66,8 +66,21 @@ class _TodoPageState extends State<TodoPage> {
             return ListView.builder(
               itemCount: snapshot.data!.size,
               itemBuilder: (context, index) {
-                return const ListTile(
-                  title: Text('Test 1'),
+                TodoModel todoModel = TodoModel.fromJSONDoc(snapshot.data!.docs[index].data());
+                return Card(
+                  child: ListTile(
+                    leading: Checkbox(
+                      value: todoModel.isCompleted,
+                      onChanged: (bool? value) {
+                        setState(() {
+                          isComplete = value!;
+                        });
+                      },
+                    ),
+                    title: Text(todoModel.title.toString()),
+                    subtitle: Text(todoModel.desc.toString()),
+                    trailing: Text(todoModel.createdAt.toString()),
+                  ),
                 );
               },
             );
@@ -94,6 +107,10 @@ class _TodoPageState extends State<TodoPage> {
   
   
   Widget customBottomSheet(){
+    titleController.clear();
+    descController.clear();
+    
+    
     return Container(
       height: 400,
       decoration: const BoxDecoration(
@@ -131,6 +148,9 @@ class _TodoPageState extends State<TodoPage> {
                 
                       await allData.add(todoNotes.toMapDoc());
                       Navigator.pop(context);
+                      setState(() {
+                        
+                      });
                     },
                     child: const Text('Save')
                 ),
