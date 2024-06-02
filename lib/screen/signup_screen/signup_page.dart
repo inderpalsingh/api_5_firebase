@@ -115,7 +115,7 @@ class SignupPage extends StatelessWidget {
 
                 InkWell(
                   onTap: () {
-                    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => LoginPage()));
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => LoginPage()));
                   },
                     child: const Text('Already have account ?', style: TextStyle(color: Colors.white),)),
                 

@@ -1,5 +1,6 @@
 import 'package:api_5_firebase/model/todo_model.dart';
 import 'package:api_5_firebase/screen/login_screen/login_page.dart';
+import 'package:api_5_firebase/screen/user_profile/user_profile.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -19,19 +20,19 @@ class _TodoPageState extends State<TodoPage> {
   
 
   late CollectionReference allData;
-  
+ 
   
   String? userId;
-  bool? isComplete;
+  String? singleNoteId;
+  
 
-  DateFormat dateFormat = DateFormat("yyyy-MM-dd HH:mm:ss");
+  DateFormat dateFormat = DateFormat("h:mm a");
   
   
 
   
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     getUserId();
   }
@@ -49,11 +50,19 @@ class _TodoPageState extends State<TodoPage> {
   Widget build(BuildContext context) {
     allData = fireStore.collection('users').doc(userId).collection('notes');
     
+    
     return Scaffold(
+      appBar: AppBar(
+        actions: [
+          IconButton(
+              onPressed: () {
+                Navigator.push(context, MaterialPageRoute(builder: (context) => UserProfile()));
+              }, icon: Icon(Icons.person))
+        ],
+      ),
       backgroundColor: Colors.blueGrey.shade200,
-      body: userId != null ?
-        FutureBuilder(
-        future: fireStore.collection('users').doc(userId).collection('notes').get(),
+      body: userId != null ? FutureBuilder(
+        future: fireStore.collection('users').doc(userId).collection('notes').orderBy('createdAt', descending: true).get(),
         builder: (context, snapshot) {
           if( snapshot.connectionState==ConnectionState.waiting ){
             return const Center(child: CircularProgressIndicator());
@@ -61,25 +70,58 @@ class _TodoPageState extends State<TodoPage> {
           if(snapshot.hasError){
             return Center(child: Text('Error: ${snapshot.hasError}'));
           }
-
+    
           if(snapshot.hasData){
+            
             return ListView.builder(
               itemCount: snapshot.data!.size,
               itemBuilder: (context, index) {
                 TodoModel todoModel = TodoModel.fromJSONDoc(snapshot.data!.docs[index].data());
-                return Card(
-                  child: ListTile(
-                    leading: Checkbox(
-                      value: todoModel.isCompleted,
-                      onChanged: (bool? value) {
-                        setState(() {
-                          isComplete = value!;
-                        });
+                singleNoteId = snapshot.data!.docs[index].id;
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                  child: Card(
+                    child: ListTile(
+                      onTap: () {
+                        titleController.text = todoModel.title!;
+                        descController.text = todoModel.desc!;
+                        showModalBottomSheet(
+                            context: context, 
+                            builder: (context) {
+                              return customBottomSheet(
+                                isUpdate: true,
+                                updateIndex: singleNoteId.toString()
+                              );
+                            },
+                        );
                       },
+                      
+                      leading: Checkbox(
+                        value: todoModel.isCompleted,
+                        onChanged: (value) {
+                          setState(() {
+                            todoModel.isCompleted = value;
+                          });
+                        },
+                      ),
+                      title: Text(todoModel.title.toString()),
+                      subtitle: Text(todoModel.desc.toString()),
+                      trailing: Column(
+                        children: [
+                          Text(todoModel.createdAt.toString(),style: const TextStyle(fontSize: 15),),
+                          InkWell(
+                            onTap: () {
+                              allData.doc(snapshot.data!.docs[index].id).delete().then((value)=> print('Deleted ..'));
+                              setState(() {
+                                
+                              });
+                            },
+                              child: const Icon(Icons.delete),
+                            
+                          )
+                        ],
+                      ),
                     ),
-                    title: Text(todoModel.title.toString()),
-                    subtitle: Text(todoModel.desc.toString()),
-                    trailing: Text(todoModel.createdAt.toString()),
                   ),
                 );
               },
@@ -87,10 +129,12 @@ class _TodoPageState extends State<TodoPage> {
           }
           return Container();
         },
-
+    
       ) : const Center(child: Text('No Notes')),
       floatingActionButton: FloatingActionButton(
         onPressed: ()  {
+          titleController.clear();
+          descController.clear();
           
           showModalBottomSheet(
               context: context,
@@ -106,15 +150,11 @@ class _TodoPageState extends State<TodoPage> {
   }
   
   
-  Widget customBottomSheet(){
-    titleController.clear();
-    descController.clear();
-    
-    
+  Widget customBottomSheet({bool isUpdate=false,String updateIndex="" }){
     return Container(
       height: 400,
       decoration: const BoxDecoration(
-          color: Colors.orange,
+          color: Colors.white,
           borderRadius: BorderRadius.vertical(top: Radius.circular(30))
       ),
       child: Container(
@@ -137,22 +177,36 @@ class _TodoPageState extends State<TodoPage> {
               children: [
                 ElevatedButton(
                     onPressed: ()async {
-                      var todoNotes = TodoModel(
-                        userId: userId,
-                        title: titleController.text,
-                        desc: descController.text,
-                        createdAt: dateFormat.format(DateTime.now()),
-                        completedAt: dateFormat.format(DateTime.now()),
+                     if(!isUpdate){
+                       TodoModel todoNotes = TodoModel(
+                           userId: userId,
+                           title: titleController.text,
+                           desc: descController.text,
+                           createdAt: dateFormat.format(DateTime.now()),
+                           completedAt: dateFormat.format(DateTime.now())
+
+                       );
+
+                       await allData.add(todoNotes.toMapDoc());
                 
-                      );
-                
-                      await allData.add(todoNotes.toMapDoc());
-                      Navigator.pop(context);
-                      setState(() {
-                        
-                      });
+                     }else{
+                       TodoModel todoNotes = TodoModel(
+                           noteId: singleNoteId.toString(),
+                           userId: userId,
+                           title: titleController.text,
+                           desc: descController.text,
+                           createdAt: dateFormat.format(DateTime.now()),
+                           completedAt: dateFormat.format(DateTime.now())
+                       );
+                       await allData.add(todoNotes.toMapDoc());
+                       
+                     }
+                     Navigator.pop(context);
+                     setState(() {
+
+                     });
                     },
-                    child: const Text('Save')
+                    child: Text( isUpdate ? 'Update' : 'Save')
                 ),
 
                 ElevatedButton(

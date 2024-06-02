@@ -1,6 +1,7 @@
 enum Priority { LOW, MED, HIGH }
 
 class TodoModel {
+  String? noteId;
   String? userId;
   String? title;
   String? desc;
@@ -10,6 +11,7 @@ class TodoModel {
   // Priority? priority;
 
   TodoModel({
+    this.noteId = "",
     this.userId = "",
     required this.title,
     required this.desc,
@@ -21,6 +23,7 @@ class TodoModel {
 
   factory TodoModel.fromJSONDoc(Map<String, dynamic> jsonDoc) {
     return TodoModel(
+      noteId: jsonDoc['noteId'],
         userId: jsonDoc['userId'],
         title: jsonDoc['title'],
         desc: jsonDoc['desc'],
