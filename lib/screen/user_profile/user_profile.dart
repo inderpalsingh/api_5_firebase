@@ -14,20 +14,31 @@ class _UserProfileState extends State<UserProfile> {
 
   final currentUser = FirebaseAuth.instance.currentUser;
   
-  late CollectionReference userIdUser;
+  // late CollectionReference userIdUser;
+  
   String? userId;
+  dynamic userIdUser;
+  
+  @override
+  void initState(){
+    super.initState();
+    getUserId();
+  }
 
   getUserId()async{
     SharedPreferences prefs = await SharedPreferences.getInstance();
     userId = prefs.getString(LoginPage.USER_ID);
     print('todo page: $userId');
-    setState(() {
-
-    });
+    
+    // setState(() {
+    //
+    // });
   }
 
   @override
   Widget build(BuildContext context) {
+    userIdUser = FirebaseFirestore.instance.collection('users').doc(userId).get();
+    print(userIdUser);
     
     return Scaffold(
       body: Column(
@@ -37,8 +48,8 @@ class _UserProfileState extends State<UserProfile> {
             height: 600,
             child: ListView(
               children: [
-                Text('${currentUser!.uid}'),
-                Text('${userIdUser.id}'),
+                Text(currentUser!.uid),
+                Text('$userIdUser'),
               ],
             ),
           )
