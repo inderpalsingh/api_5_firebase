@@ -89,11 +89,14 @@ class _TodoPageState extends State<TodoPage> {
                                 },
                               );
                             },
+                            tileColor: todoModel.isCompleted! ? Colors.green.shade300 : null,
                             leading: Checkbox(
-                              value: isCompleted,
+                              value: todoModel.isCompleted,
                               onChanged: (bool? value) {
                                 setState(() {
                                   isCompleted = value!;
+                                  allData.doc(snapshot.data!.docs[index].id).update(
+                                      {"isCompleted": value});
                                 });
                               },
                             ),
@@ -146,7 +149,7 @@ class _TodoPageState extends State<TodoPage> {
 
   Widget customBottomSheet({bool isUpdate = false, String updateIndex = ""}) {
     return Container(
-      height: 400,
+      height: 600,
       decoration: const BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.vertical(top: Radius.circular(30))),
@@ -171,7 +174,7 @@ class _TodoPageState extends State<TodoPage> {
                 ElevatedButton(
                     onPressed: () async {
                       if (!isUpdate) {
-                        TodoModel todoNotes = TodoModel(
+                        TodoModel todoAddNotes = TodoModel(
                             userId: userId,
                             title: titleController.text,
                             desc: descController.text,
@@ -179,9 +182,9 @@ class _TodoPageState extends State<TodoPage> {
                             completedAt: dateFormat.format(DateTime.now()));
                         
                         // 
-                        await allData.add(todoNotes.toMapDoc());
+                        await allData.add(todoAddNotes.toMapDoc());
                       } else {
-                        TodoModel todoNotes = TodoModel(
+                        TodoModel todoUpdateNotes = TodoModel(
                             noteId: singleNoteId.toString(),
                             userId: userId,
                             title: titleController.text,
@@ -189,7 +192,7 @@ class _TodoPageState extends State<TodoPage> {
                             createdAt: dateFormat.format(DateTime.now()),
                             completedAt: dateFormat.format(DateTime.now()));
                         // await allData.add(todoNotes.toMapDoc());
-                        fireStore.collection('users').doc(userId).collection('notes').doc(updateIndex).update(todoNotes.toMapDoc());
+                        fireStore.collection('users').doc(userId).collection('notes').doc(updateIndex).update(todoUpdateNotes.toMapDoc());
                       }
                       Navigator.pop(context);
                       setState(() {});

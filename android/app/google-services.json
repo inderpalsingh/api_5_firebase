@@ -9,7 +9,7 @@
       "client_info": {
         "mobilesdk_app_id": "1:40944718112:android:638e4e9ce208d86aef4745",
         "android_client_info": {
-          "package_name": "com.firebaselocal.local"
+          "package_name": "com.firebaselocal.local.api_5_firebase"
         }
       },
       "oauth_client": [],

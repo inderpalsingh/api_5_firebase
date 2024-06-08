@@ -41,6 +41,7 @@ class _UserProfileState extends State<UserProfile> {
     print(userIdUser);
     
     return Scaffold(
+      appBar: AppBar(),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
