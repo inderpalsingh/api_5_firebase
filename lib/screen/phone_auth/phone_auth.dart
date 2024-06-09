@@ -1,3 +1,4 @@
+import 'package:api_5_firebase/screen/todo_screen/todo_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -7,6 +8,8 @@ class PhoneAuthPage extends StatelessWidget {
   TextEditingController col2 = TextEditingController();
   TextEditingController col3 = TextEditingController();
   TextEditingController col4 = TextEditingController();
+  TextEditingController col5 = TextEditingController();
+  TextEditingController col6 = TextEditingController();
   TextEditingController mobileController = TextEditingController();
 
   FirebaseAuth firebaseAuth = FirebaseAuth.instance;
@@ -126,6 +129,36 @@ class PhoneAuthPage extends StatelessWidget {
                       ),
 
                     ),
+                  ),
+                  const Spacer(),
+                  SizedBox(
+                    height: 50,
+                    width: 50,
+                    child: TextField(
+                      keyboardType: TextInputType.number,
+                      textAlign: TextAlign.center,
+                      inputFormatters: [LengthLimitingTextInputFormatter(1),FilteringTextInputFormatter.digitsOnly],
+                      controller: col5,
+                      decoration: const InputDecoration(
+                          border: OutlineInputBorder()
+                      ),
+
+                    ),
+                  ),
+                  const Spacer(),
+                  SizedBox(
+                    height: 50,
+                    width: 50,
+                    child: TextField(
+                      keyboardType: TextInputType.number,
+                      textAlign: TextAlign.center,
+                      inputFormatters: [LengthLimitingTextInputFormatter(1),FilteringTextInputFormatter.digitsOnly],
+                      controller: col6,
+                      decoration: const InputDecoration(
+                          border: OutlineInputBorder()
+                      ),
+
+                    ),
                   )
                 ],
               ),
@@ -137,7 +170,7 @@ class PhoneAuthPage extends StatelessWidget {
                 style: ElevatedButton.styleFrom(foregroundColor: Colors.black,backgroundColor: Colors.amberAccent),
                   onPressed: () async {
 
-                  final otpPin = col1.text + col2.text + col3.text + col4.text;
+                  final otpPin = col1.text + col2.text + col3.text + col4.text+ col5.text + col6.text;
 
                   print(otpPin);
 
@@ -147,8 +180,12 @@ class PhoneAuthPage extends StatelessWidget {
                   PhoneAuthCredential credential = PhoneAuthProvider.credential(verificationId: mVerificationId!, smsCode: smsCode);
 
                   // Sign the user in (or link) with the credential
-                  var mData =  await firebaseAuth.signInWithCredential(credential);
-                  print("User Logged in : ${mData.user!.uid}");
+
+
+                  UserCredential getUser = await firebaseAuth.signInWithCredential(credential);
+                  if(getUser != null){
+                    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=> TodoPage()));
+                  }
 
                   }, child: const Text('Verify'))
             ],
